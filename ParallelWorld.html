@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>뽀용이의 편지</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gowun+Dodum&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e8f5e9;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, #c8e6c9 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, #dcedc8 0%, transparent 50%);
+    font-family: 'Gowun Dodum', sans-serif;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+    transition: background 1s ease, background-image 1s ease;
+  }
+
+  body.revealed-pink {
+    background: #fce4ec;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, #f8bbd0 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, #fce4ec 0%, transparent 50%);
+  }
+
+  body.revealed-blue {
+    background: #e3f2fd;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, #bbdefb 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, #e3f2fd 0%, transparent 50%);
+  }
+
+  /* 배경 장식 */
+  body::before {
+    content: '🌱 🌿 🌱 🌿 🌱 🌿 🌱 🌿 🌱 🌿 🌱 🌿';
+    position: fixed;
+    top: 12px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 16px;
+    color: #81c784;
+    opacity: 0.6;
+    letter-spacing: 4px;
+  }
+  body::after {
+    content: '🌱 🌿 🌱 🌿 🌱 🌿 🌱 🌿 🌱 🌿 🌱 🌿';
+    position: fixed;
+    bottom: 12px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 16px;
+    color: #81c784;
+    opacity: 0.6;
+    letter-spacing: 4px;
+  }
+
+  /* 봉투 씬 */
+  #scene {
+    position: relative;
+    width: 260px;
+    height: 180px;
+    perspective: 1000px;
+    transition: all 0.6s ease;
+  }
+
+  #scene.opened {
+    width: min(700px, 95vw);
+    height: auto;
+    min-height: 420px;
+    cursor: default;
+  }
+
+  /* 봉투 */
+  #envelope {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  #scene.opened #envelope {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+  }
+
+  .envelope-body {
+    width: 260px;
+    height: 180px;
+    background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
+    border-radius: 8px;
+    border: 2px solid #aed581;
+    box-shadow: 0 8px 32px rgba(100,160,80,0.18), 0 2px 8px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: visible;
+  }
+
+  .envelope-flap {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 0;
+    height: 0;
+    border-left: 132px solid transparent;
+    border-right: 132px solid transparent;
+    border-top: 90px solid #c5e1a5;
+    filter: drop-shadow(0 3px 4px rgba(100,160,80,0.15));
+    z-index: 2;
+  }
+  .envelope-flap::after {
+    content: '';
+    position: absolute;
+    top: -90px;
+    left: -130px;
+    width: 0;
+    height: 0;
+    border-left: 130px solid transparent;
+    border-right: 130px solid transparent;
+    border-top: 88px solid #dcedc8;
+  }
+
+  .envelope-bottom {
+    position: absolute;
+    bottom: -2px;
+    left: -2px;
+    width: 0;
+    height: 0;
+    border-left: 132px solid transparent;
+    border-right: 132px solid transparent;
+    border-bottom: 100px solid #b9d98a;
+  }
+  .envelope-left {
+    position: absolute;
+    bottom: -2px;
+    left: -2px;
+    width: 0;
+    height: 0;
+    border-left: 160px solid #c8e6a0;
+    border-top: 182px solid transparent;
+  }
+  .envelope-right {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 0;
+    height: 0;
+    border-right: 160px solid #c8e6a0;
+    border-top: 182px solid transparent;
+  }
+
+  .seal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 36px;
+    z-index: 10;
+    animation: heartbeat 1.4s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px rgba(100,160,80,0.3));
+  }
+
+  @keyframes heartbeat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    30% { transform: translate(-50%, -50%) scale(1.12); }
+    60% { transform: translate(-50%, -50%) scale(1.04); }
+  }
+
+  .tap-hint {
+    position: absolute;
+    bottom: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: #558b2f;
+    white-space: nowrap;
+    animation: blink 1.6s ease-in-out infinite;
+    font-family: 'Gowun Dodum', sans-serif;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* 편지 */
+  #letter {
+    display: none;
+    width: 100%;
+    min-height: 420px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(100,160,80,0.18), 0 4px 16px rgba(0,0,0,0.1);
+    opacity: 0;
+    transition: opacity 0.5s ease 0.3s;
+  }
+
+  #scene.opened #letter {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* 왼쪽 편지지 */
+  .letter-left {
+    flex: 1;
+    background: linear-gradient(160deg, #f9fbe7 0%, #f1f8e9 100%);
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    border-right: 1px dashed #aed581;
+    transition: background 1s ease, border-color 1s ease;
+  }
+
+  .letter-left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 35px,
+      #c5e1a5 35px,
+      #c5e1a5 36px
+    );
+    opacity: 0.4;
+  }
+
+  .letter-left-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .letter-greeting {
+    font-family: 'Nanum Pen Script', cursive;
+    font-size: clamp(28px, 5vw, 38px);
+    color: #2e7d32;
+    line-height: 1.9;
+    word-break: keep-all;
+    transition: color 1s ease;
+  }
+
+  .letter-greeting .highlight {
+    color: #388e3c;
+    font-size: 1.15em;
+    transition: color 1s ease;
+  }
+
+  .letter-deco {
+    margin-top: 28px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    font-size: 20px;
+  }
+
+  /* 오른쪽 편지지 */
+  .letter-right {
+    flex: 1;
+    background: linear-gradient(160deg, #f1f8e9 0%, #e8f5e9 100%);
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: relative;
+    transition: background 1s ease;
+  }
+
+  .letter-right.revealed-pink {
+    background: linear-gradient(160deg, #fce4ec 0%, #f8bbd0 100%);
+  }
+  .letter-right.revealed-blue {
+    background: linear-gradient(160deg, #e3f2fd 0%, #bbdefb 100%);
+  }
+
+  .letter-right::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 35px,
+      #b2dfdb 35px,
+      #b2dfdb 36px
+    );
+    opacity: 0.3;
+  }
+
+  /* 스크래치 영역 */
+  .scratch-wrapper {
+    position: relative;
+    z-index: 1;
+    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .scratch-label {
+    font-size: 13px;
+    color: #558b2f;
+    letter-spacing: 0.5px;
+    transition: color 1s ease;
+  }
+
+  .scratch-container {
+    position: relative;
+    width: 220px;
+    height: 220px;
+  }
+
+  /* 숨겨진 내용 */
+  .scratch-reveal {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+    border: 2px dashed #f48fb1;
+    padding: 6px;
+    overflow: hidden;
+    transition: background 0.8s ease;
+  }
+
+  .baby-date {
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 13px;
+    color: #c2185b;
+    text-align: center;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  .baby-img {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1.5px solid #f48fb1;
+  }
+
+  .gender-text {
+    font-family: 'Nanum Pen Script', cursive;
+    font-size: 52px;
+    color: #e91e8c;
+    line-height: 1;
+    animation: none;
+  }
+
+  .gender-sub {
+    font-size: 14px;
+    color: #c2185b;
+    font-family: 'Gowun Dodum', sans-serif;
+  }
+
+  .revealed .gender-text {
+    animation: pop 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* 캔버스 */
+  #scratchCanvas {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='8' fill='%2366bb6a' opacity='0.6'/%3E%3C/svg%3E") 12 12, crosshair;
+    touch-action: none;
+  }
+
+  .scratch-progress {
+    font-size: 12px;
+    color: #558b2f;
+    transition: opacity 0.5s, color 1s ease;
+  }
+
+  /* 하단 텍스트 */
+  .letter-bottom {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding-bottom: 8px;
+    width: 100%;
+  }
+
+  .meet-text {
+    font-family: 'Nanum Pen Script', cursive;
+    font-size: clamp(28px, 5vw, 38px);
+    color: #2e7d32;
+    position: relative;
+    transition: color 1s ease;
+    white-space: nowrap;
+  }
+
+  .meet-text.revealed-pink { color: #c2185b; }
+  .meet-text.revealed-blue { color: #c2185b; }
+
+  .meet-text::before {
+    content: '🌿 ';
+  }
+  .meet-text::after {
+    content: ' 🌿';
+  }
+
+  /* 반짝이 효과 */
+  .sparkle {
+    position: absolute;
+    pointer-events: none;
+    animation: sparkle-fade 0.8s ease forwards;
+    font-size: 16px;
+    z-index: 100;
+  }
+
+  @keyframes sparkle-fade {
+    0% { opacity: 1; transform: scale(0) translate(0, 0); }
+    50% { opacity: 1; transform: scale(1.2) translate(var(--tx), var(--ty)); }
+    100% { opacity: 0; transform: scale(0.5) translate(calc(var(--tx)*2), calc(var(--ty)*2)); }
+  }
+
+  /* 모바일 */
+  @media (max-width: 520px) {
+    #scene.opened {
+      flex-direction: column;
+      min-height: auto;
+    }
+    #letter {
+      flex-direction: column;
+    }
+    .letter-left, .letter-right {
+      padding: 28px 24px;
+    }
+    .letter-left {
+      border-right: none;
+      border-bottom: 1px dashed #aed581;
+    }
+  }
+
+  /* ── 전체 테마 전환: revealed-pink ── */
+  body.revealed-pink {
+    background: #fce4ec !important;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, #f8bbd0 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, #fce4ec 0%, transparent 50%) !important;
+  }
+  body.revealed-pink::before,
+  body.revealed-pink::after {
+    content: '🎀 🌸 🎀 🌸 🎀 🌸 🎀 🌸 🎀 🌸 🎀 🌸';
+    color: #f48fb1;
+  }
+  body.revealed-pink .envelope-body {
+    background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+    border-color: #f48fb1;
+    box-shadow: 0 8px 32px rgba(200,80,120,0.18), 0 2px 8px rgba(0,0,0,0.08);
+  }
+  body.revealed-pink .envelope-flap {
+    border-top-color: #f48fb1;
+  }
+  body.revealed-pink .envelope-flap::after {
+    border-top-color: #fce4ec;
+  }
+  body.revealed-pink .envelope-bottom {
+    border-bottom-color: #f06292;
+  }
+  body.revealed-pink .envelope-left {
+    border-left-color: #f8bbd0;
+  }
+  body.revealed-pink .envelope-right {
+    border-right-color: #f8bbd0;
+  }
+  body.revealed-pink .seal {
+    filter: drop-shadow(0 2px 4px rgba(200,80,120,0.3));
+  }
+  body.revealed-pink .tap-hint { color: #c2185b; }
+  body.revealed-pink #letter {
+    box-shadow: 0 20px 60px rgba(200,80,120,0.18), 0 4px 16px rgba(0,0,0,0.1);
+  }
+  body.revealed-pink .letter-left {
+    background: linear-gradient(160deg, #fff5f8 0%, #fce4ec 100%);
+    border-right-color: #f48fb1;
+  }
+  body.revealed-pink .letter-left::before {
+    background-image: repeating-linear-gradient(
+      transparent, transparent 35px, #f8bbd0 35px, #f8bbd0 36px
+    );
+  }
+  body.revealed-pink .letter-greeting { color: #880e4f; }
+  body.revealed-pink .letter-greeting .highlight { color: #e91e8c; }
+  body.revealed-pink .letter-right {
+    background: linear-gradient(160deg, #fce4ec 0%, #f8bbd0 100%);
+  }
+  body.revealed-pink .letter-right::before {
+    background-image: repeating-linear-gradient(
+      transparent, transparent 35px, #f06292 35px, #f06292 36px
+    );
+  }
+  body.revealed-pink .meet-text { color: #c2185b; }
+  body.revealed-pink .scratch-label { color: #c2185b; }
+  body.revealed-pink .scratch-progress { color: #c2185b; }
+  body.revealed-pink .letter-left {
+    border-bottom-color: #f48fb1;
+  }
+</style>
+</head>
+<body>
+
+<div id="scene">
+  <!-- 봉투 -->
+  <div id="envelope">
+    <div class="envelope-body">
+      <div class="envelope-left"></div>
+      <div class="envelope-right"></div>
+      <div class="envelope-bottom"></div>
+      <div class="envelope-flap"></div>
+      <div class="seal">💌</div>
+    </div>
+    <div class="tap-hint">✦ 탭해서 열어보세요 ✦</div>
+  </div>
+
+  <!-- 펼쳐진 편지 -->
+  <div id="letter">
+    <!-- 왼쪽 -->
+    <div class="letter-left">
+      <div class="letter-left-content">
+        <div class="letter-greeting">
+          안녕하세요 👋<br>
+          저는 <span class="highlight">뽀용이</span>라고 해요.<br>
+          아직 엄마 뱃속에 있어요 🤰<br><br>
+          제 성별은 무엇일까요? 🤔
+        </div>
+        <div class="letter-deco">
+          <span>🌱</span><span>🌸</span><span>🌿</span><span>🌱</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽 -->
+    <div class="letter-right">
+      <div class="scratch-wrapper">
+        <div class="scratch-label">긁어서 확인해보세요 ✨</div>
+        <div class="scratch-container">
+          <!-- 숨겨진 내용 -->
+          <div class="scratch-reveal" id="reveal">
+            <div class="baby-date" id="babyDate"></div>
+            <img class="baby-img" src="data:image/png;base64,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" alt="뽀용이" />
+            <div class="gender-text">딸</div>
+            <div class="gender-sub">👧 공주님 탄생!</div>
+          </div>
+          <!-- 긁는 캔버스 -->
+          <canvas id="scratchCanvas" width="220" height="220"></canvas>
+        </div>
+        <div class="scratch-progress" id="progressText">조금만 더 긁어보세요~</div>
+      </div>
+
+      <div class="letter-bottom">
+        <div class="meet-text">10월에 만나요~</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const scene = document.getElementById('scene');
+  const envelope = document.getElementById('envelope');
+  const letter = document.getElementById('letter');
+  const canvas = document.getElementById('scratchCanvas');
+  const ctx = canvas.getContext('2d');
+  const reveal = document.getElementById('reveal');
+  const progressText = document.getElementById('progressText');
+
+  let isOpened = false;
+  let isDrawing = false;
+  let revealed = false;
+
+  // 은박지 그리기
+  function drawScratch() {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // 은색 그라디언트
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, '#d8d8d8');
+    grad.addColorStop(0.15, '#f0f0f0');
+    grad.addColorStop(0.3, '#b8b8b8');
+    grad.addColorStop(0.45, '#e8e8e8');
+    grad.addColorStop(0.6, '#c0c0c0');
+    grad.addColorStop(0.75, '#f2f2f2');
+    grad.addColorStop(0.9, '#b0b0b0');
+    grad.addColorStop(1, '#d0d0d0');
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 반짝이 텍스처
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    for (let i = 0; i < 120; i++) {
+      const x = Math.random() * w;
+      const y = Math.random() * h;
+      const r = Math.random() * 2.5;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 대각선 광택
+    const shineGrad = ctx.createLinearGradient(0, 0, w, h);
+    shineGrad.addColorStop(0, 'rgba(255,255,255,0)');
+    shineGrad.addColorStop(0.4, 'rgba(255,255,255,0.25)');
+    shineGrad.addColorStop(0.5, 'rgba(255,255,255,0.1)');
+    shineGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = shineGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 테두리
+    ctx.strokeStyle = '#aaa';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(1, 1, w - 2, h - 2, 10);
+    ctx.stroke();
+
+    // 작은 텍스트 힌트
+    ctx.fillStyle = 'rgba(140,140,140,0.7)';
+    ctx.font = '12px Gowun Dodum, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('☆ 긁어요 ☆', w / 2, h / 2);
+  }
+
+  drawScratch();
+
+  // 봉투 열기
+  function openEnvelope() {
+    if (isOpened) return;
+    isOpened = true;
+
+    // 봉투 흔들리며 사라짐
+    envelope.style.animation = 'none';
+    envelope.style.transform = 'scale(1.05) rotate(-2deg)';
+    setTimeout(() => {
+      scene.classList.add('opened');
+      // 편지 표시 (CSS transition으로 처리)
+    }, 100);
+  }
+
+  envelope.addEventListener('click', openEnvelope);
+  envelope.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    openEnvelope();
+  }, { passive: false });
+
+  // 긁기 기능
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if (e.touches) {
+      return {
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top) * scaleY
+      };
+    }
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  }
+
+  function scratch(pos) {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+
+    checkProgress();
+    spawnSparkle(pos);
+  }
+
+  function checkProgress() {
+    if (revealed) return;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    let transparent = 0;
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] < 128) transparent++;
+    }
+    const total = canvas.width * canvas.height;
+    const percent = Math.round((transparent / total) * 100);
+
+    if (percent > 60) {
+      revealAnswer();
+    } else if (percent > 20) {
+      progressText.textContent = '거의 다 왔어요! 💕';
+    }
+  }
+
+  function revealAnswer() {
+    if (revealed) return;
+    revealed = true;
+
+    // 캔버스 완전히 지우기
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.style.pointerEvents = 'none';
+    progressText.style.opacity = '0';
+
+    reveal.classList.add('revealed');
+
+    // 전체 테마 전환 (연두 → 성별 색)
+    document.body.classList.add('revealed-pink');
+
+    // 직접 스타일 적용 (CSS 특이도 보장)
+    const tr = 'transition: all 1s ease';
+    const setStyle = (sel, styles) => {
+      document.querySelectorAll(sel).forEach(el => {
+        Object.assign(el.style, styles);
+      });
+    };
+
+    setStyle('.letter-left', {
+      background: 'linear-gradient(160deg, #fff5f8 0%, #fce4ec 100%)',
+      borderRightColor: '#f48fb1',
+      borderBottomColor: '#f48fb1',
+      transition: 'background 1s ease, border-color 1s ease'
+    });
+    setStyle('.letter-left::before', {});
+    setStyle('.letter-greeting', {
+      color: '#880e4f',
+      transition: 'color 1s ease'
+    });
+    document.querySelectorAll('.letter-greeting .highlight').forEach(el => {
+      el.style.color = '#e91e8c';
+      el.style.transition = 'color 1s ease';
+    });
+    setStyle('.letter-right', {
+      background: 'linear-gradient(160deg, #fce4ec 0%, #f8bbd0 100%)',
+      transition: 'background 1s ease'
+    });
+    setStyle('.meet-text', {
+      color: '#c2185b',
+      transition: 'color 1s ease'
+    });
+    setStyle('.scratch-label', {
+      color: '#c2185b',
+      transition: 'color 1s ease'
+    });
+    setStyle('.scratch-progress', {
+      color: '#c2185b',
+      transition: 'color 1s ease'
+    });
+    setStyle('.tap-hint', {
+      color: '#c2185b',
+      transition: 'color 1s ease'
+    });
+
+    // 이모지 전환
+    const decoSpans = document.querySelectorAll('.letter-deco span');
+    const newEmojis = ['🎀', '💕', '🌸', '🌷'];
+    decoSpans.forEach((s, i) => { s.textContent = newEmojis[i % newEmojis.length]; });
+
+    // meet-text 장식 교체
+    const style = document.createElement('style');
+    style.textContent = `.meet-text::before { content: '🌸 '; } .meet-text::after { content: ' 🌸'; }`;
+    document.head.appendChild(style);
+
+    // 폭죽 효과
+    for (let i = 0; i < 20; i++) {
+      setTimeout(() => {
+        spawnConfetti();
+      }, i * 80);
+    }
+  }
+
+  // 반짝이 파티클
+  function spawnSparkle(pos) {
+    if (Math.random() > 0.3) return;
+    const rect = canvas.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'sparkle';
+    el.textContent = ['✨', '⭐', '💫', '🌟'][Math.floor(Math.random() * 4)];
+    el.style.left = (rect.left + pos.x * (rect.width / canvas.width)) + 'px';
+    el.style.top = (rect.top + pos.y * (rect.height / canvas.height)) + 'px';
+    el.style.setProperty('--tx', (Math.random() * 40 - 20) + 'px');
+    el.style.setProperty('--ty', (Math.random() * 40 - 20) + 'px');
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+  }
+
+  function spawnConfetti() {
+    const emojis = ['🎀', '🌸', '💕', '✨', '🌷', '👧', '💝', '🎊'];
+    const el = document.createElement('div');
+    el.className = 'sparkle';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = (20 + Math.random() * 60) + '%';
+    el.style.top = (20 + Math.random() * 60) + '%';
+    el.style.fontSize = (16 + Math.random() * 20) + 'px';
+    el.style.setProperty('--tx', (Math.random() * 100 - 50) + 'px');
+    el.style.setProperty('--ty', (Math.random() * 100 - 50) + 'px');
+    el.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+  }
+
+  // 마우스 이벤트
+  canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(getPos(e)); });
+  canvas.addEventListener('mousemove', (e) => { if (isDrawing) scratch(getPos(e)); });
+  canvas.addEventListener('mouseup', () => isDrawing = false);
+  canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+  // 터치 이벤트
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    isDrawing = true;
+    scratch(getPos(e));
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (isDrawing) scratch(getPos(e));
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', () => isDrawing = false);
+
+  // 날짜 자동 계산
+  function calcBabyDate() {
+    // 기준: 2026-03-19 = 11주 1일차, D-202
+    const BASE_DATE = new Date('2026-03-19');
+    const BASE_WEEK = 11;
+    const BASE_DAY_IN_WEEK = 1; // 1일차
+    const BASE_DDAY = 202;
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    BASE_DATE.setHours(0,0,0,0);
+
+    const diffDays = Math.floor((today - BASE_DATE) / (1000 * 60 * 60 * 24));
+
+    const totalDaysInWeek = (BASE_WEEK - 1) * 7 + (BASE_DAY_IN_WEEK - 1) + diffDays;
+    const weeks = Math.floor(totalDaysInWeek / 7) + 1;
+    const dayInWeek = (totalDaysInWeek % 7) + 1;
+    const dday = BASE_DDAY - diffDays;
+
+    const el = document.getElementById('babyDate');
+    if (el) {
+      el.innerHTML = `${weeks}주 ${dayInWeek}일차&nbsp; D-${dday}`;
+    }
+  }
+  calcBabyDate();
+
+</script>
+</body>
+</html>
