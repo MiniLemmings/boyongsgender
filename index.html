@@ -958,9 +958,12 @@
     const diffDays = Math.floor((today - BASE_DATE) / (1000 * 60 * 60 * 24));
 
     const totalDaysInWeek = (BASE_WEEK - 1) * 7 + (BASE_DAY_IN_WEEK - 1) + diffDays;
-    const weeks = Math.floor(totalDaysInWeek / 7) + 1;
-    const dayInWeek = (totalDaysInWeek % 7) + 1;
+    const rawWeeks = Math.floor(totalDaysInWeek / 7) + 1;
+    const rawDayInWeek = (totalDaysInWeek % 7) + 1;
     const dday = BASE_DDAY - diffDays;
+
+    const weeks = rawDayInWeek === 7 ? rawWeeks + 1 : rawWeeks;
+    const dayInWeek = rawDayInWeek === 7 ? 0 : rawDayInWeek;
 
     const el = document.getElementById('babyDate');
     if (el) {
